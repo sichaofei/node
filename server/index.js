@@ -20,7 +20,7 @@ var app = express();
 // app.use(objMulter.any());
 app.use(bodyParser.json());//数据JSON类型
 // app.use(multer)
-app.use(express.static('../public'))
+app.use(express.static('./public'))
 // app.use(multer);
 app.all('*', function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "http://localhost:8080");
