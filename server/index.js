@@ -15,6 +15,7 @@ var upload=require("./upload")
 var app = express();
 // app.use(objMulter.any());
 app.use(bodyParser.json());//数据JSON类型
+app.use(bodyParser.urlencoded({ extended: false }));//解析post请求数据
 // app.use(multer)
 app.use(express.static('./public'))
 // app.use(multer);
