@@ -56,3 +56,60 @@ module.exports.findUserMsg=function(id,connection,cd){
         })
     })
 }
+// 创建存储图片集合并存储 
+// module.exports.uploadImg=function(obj,connection,cd){
+//     _connect(function(db){
+//         db.collection(connection).insertOne(obj,function(err,results){
+//             if(!err){
+//                 cd(results)
+//             }else{
+//                 cd()
+//             }
+//         })
+//     })
+// }
+function insertImg(db,connection,cd,obj){
+     db.collection(connection).insertOne(obj,function(err,results){
+             if(!err){
+                 cd(results)
+             }else{
+                 cd()
+             }
+    })
+}
+// 查询用户头像集合
+module.exports.findUserHeadImg=function(obj,connection,cd,find){
+    let id=obj.userId
+    var whereStr={userId:id}
+    _connect(function(db){
+        db.collection(connection).find(whereStr).toArray(function(err,results){
+            if(find){
+                cd(results[0])
+            }else{
+                    if(results.length==0){
+                        insertImg(db,connection,cd,obj)
+                    }else{
+                        reserveImg(db,connection,cd,results,obj)
+                    }
+            }
+           
+        })
+    })
+}
+//更新用户头像
+function reserveImg(db,connection,cd,results,obj){
+     let id=obj.userId
+     let url=obj.imgUrl[0]
+    let whereStr={userId:id}
+    let imgUrl=results[0].imgUrl
+    imgUrl.unshift(url)
+     var updateStr = {$set: { "imgUrl": imgUrl}};
+    db.collection(connection).updateOne(whereStr, updateStr, function(err, results) {
+        if(!err){
+            cd(results)
+        }
+    });
+}
+module.exports.upload=function(db,connection,cd){
+
+}
