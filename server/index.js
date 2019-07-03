@@ -1,5 +1,8 @@
 //express_demo.js 文件
 var express = require('express');
+var app = require('express')();
+var http = require('http').Server(app);
+var io = require('socket.io')(8083);
 var bodyParser=require("body-parser");  
 var fs=require("fs")
 // 读取文件
@@ -12,7 +15,9 @@ var login=require("./login")
 var my=require("./myMsg")
 // 上传图片
 var upload=require("./upload")
-var app = express();
+// socket
+var socket=require("./socket/index.js")
+var friends=require("./socket/find.js")
 // app.use(objMulter.any());
 app.use(bodyParser.json());//数据JSON类型
 app.use(bodyParser.urlencoded({ extended: false }));//解析post请求数据
@@ -23,6 +28,7 @@ app.all('*', function (req, res, next) {
    var orginList=[
         "http://localhost:8080",
         "http://192.168.0.108:8080",
+        "http://192.168.60.228:8080",
     ]
     if(orginList.includes(req.headers.origin.toLowerCase())){
         //设置允许跨域的域名，*代表允许任意域名跨域
@@ -35,10 +41,13 @@ app.all('*', function (req, res, next) {
     if (req.method == "OPTIONS") res.sendStatus(200);/*让options请求快速返回*/
     else next();
 });
+// SocketIO
+socket(io)
 // 路由模块逻辑
 reser(app)
 login(app)
 my(app)
+friends(app)
 upload(app,multer)
 var server = app.listen(8081, function () {
   var host = server.address().address

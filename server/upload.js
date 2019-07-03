@@ -1,8 +1,10 @@
 var sendFn=require("./send")
-var imgUrlHead="http://192.168.0.108:8081/images/"
+// var imgUrlHead="http://192.168.0.108:8081/images/"
+var imgUrlHead="http://192.168.60.228:8081/images/"
 var mongodb=require("../mongodb/connect.js")
-var url
+
 module.exports=function(app,multer){
+	var url
 	const storage = multer.diskStorage({
 		
 	  // destination:'public/uploads/'+new Date().getFullYear() + (new Date().getMonth()+1) + new Date().getDate(),
@@ -13,7 +15,8 @@ module.exports=function(app,multer){
 	  // 设置存储文件名字
 	  filename(req,file,cb){
 	    const filenameArr = file.originalname.split('.');
-	    url=Date.now() + '.' + filenameArr[filenameArr.length-1]
+		url=Date.now() + '.' + filenameArr[filenameArr.length-1]
+		console.log(url)
 	    cb(null,url);
 	  }
 	});
@@ -22,8 +25,9 @@ module.exports=function(app,multer){
     app.post("/upload/headImg",uploadImg,function(req,res){
     	console.log(imgUrlHead)
     	console.log(url)
-    	imgUrlHead+=url
-    	let obg={imgurl:imgUrlHead}
+		imgUrlHead+=url
+		let obg={imgurl:imgUrlHead}
+		imgUrlHead="http://192.168.60.228:8081/images/"
     	sendFn(res,1,"",obg)
     })
     // 图片存储mongodbimg
@@ -43,5 +47,12 @@ module.exports=function(app,multer){
     	mongodb.findUserHeadImg(obj,"userImg",function(results){
     		sendFn(res,1,"ok",results)
     	},"find")
-    })
+	})
+	// 更新历史头像默认位置
+	app.post("/uplate/userImg",function(req,res){
+		let obj={userId:req.body.userId,imgUrl:req.body.imgUrl}
+		mongodb.uplateHistoryImg(obj,"userImg",function(results){
+			sendFn(res,1,"修改成功",{})
+		})
+	})
 }

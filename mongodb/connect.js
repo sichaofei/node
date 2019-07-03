@@ -9,7 +9,7 @@ function _connect(cb){
             console.log("失败");
         }else{
             var db=client.db("sichaofei");
-            cb(db);
+            cb(db,client);
         }
     })
 }
@@ -110,6 +110,40 @@ function reserveImg(db,connection,cd,results,obj){
         }
     });
 }
-module.exports.upload=function(db,connection,cd){
-
+// 查询符合的用户历史头像
+module.exports.uplateHistoryImg=function(obj,connection,cd){
+    var whereStr={userId:obj.userId}
+    var updateStr
+   _connect(function(db){
+       db.collection(connection).find({userId:obj.userId}).toArray(function(err,results){
+           let imgList=results[0].imgUrl
+           for(var i=0;i<imgList.length;i++){
+               if(imgList[i]==obj.imgUrl){
+                imgList.splice(i,1);
+                imgList.unshift(obj.imgUrl)
+                updateStr = {$set: { "imgUrl": imgList}};
+                changeHistoryImg(db,updateStr,whereStr,cd,connection)
+                break
+               }
+           }
+       })
+   })
+}
+// 更改历史头像位置
+function changeHistoryImg(db,updateStr,whereStr,cd,connection){
+    db.collection(connection).updateOne(whereStr,updateStr,function(err,results){
+        if(!err){
+            cd("ok")
+        }
+        
+    })
+}
+// 查找所有用户
+module.exports.peoples=function(connection,cd){
+    _connect(function(db,client){
+        db.collection(connection).find({}).toArray(function(err,results){
+            cd(results)
+            client.close()
+        })
+    })
 }
